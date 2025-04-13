@@ -1,0 +1,134 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.3'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id "org.sonarqube" version "6.0.1.5171"
+    id 'jacoco'
+}
+
+group = 'org.shax3'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.spring.io/milestone' }
+}
+
+jacoco {
+    toolVersion = "0.8.8"
+}
+
+jacocoTestReport {
+    dependsOn test
+
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
+
+    afterEvaluate {
+        classDirectories.setFrom(
+                files(classDirectories.files.collect {
+                    fileTree(dir: it, exclude: [
+                            '**/config/**',
+                            '**/dto/**',
+                            '**/entity/**',
+                            '**/repository/**',
+                            '**/controller/**',
+                            '**/exception/**',
+                            '**/SquareApplication*',
+                            '**/*Test*',
+                            '**/Q*',
+                            '**/generated/**'
+                    ])
+                })
+        )
+    }
+}
+
+jacocoTestReport {
+    dependsOn test
+}
+
+dependencies {
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    //jpa
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    //mongodb
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+
+    //redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    //sql
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
+    //validation(유효성 검사)
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    //lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    //QueryDSL
+    implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
+    annotationProcessor 'com.querydsl:querydsl-apt:5.1.0:jakarta'
+
+    //HTTP 요청 라이브러리
+    implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+    
+    //json 처리 라이브러리
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
+    // JWT 토큰 관련 설정
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+    //swagger 설정
+    implementation 'io.swagger.core.v3:swagger-annotations:2.2.28'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
+    implementation 'org.springdoc:springdoc-openapi-starter-common:2.8.5'
+
+    //커넥션 풀 관련 설정
+    implementation 'org.apache.commons:commons-pool2:2.11.1'
+
+    //s3 관련 설정
+    implementation 'software.amazon.awssdk:s3:2.20.26'
+
+    //파이어베이스 설정
+    implementation 'com.google.firebase:firebase-admin:9.2.0'
+
+    implementation('org.springframework.ai:spring-ai-openai-spring-boot-starter:0.8.0') {
+        exclude group: 'org.springframework.cloud', module: 'spring-cloud-function-context'
+    }
+
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'com.h2database:h2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
